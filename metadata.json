@@ -1,0 +1,5 @@
+{
+  "name": "React Image Compressor",
+  "description": "A client-side image compressor built with React and Tailwind CSS. Users can upload an image, adjust the compression quality, and download the optimized version.",
+  "requestFramePermissions": []
+}
