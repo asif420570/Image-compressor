@@ -1,5 +1,5 @@
 {
-  "name": "Batch Image Compressor",
-  "description": "A client-side batch image compressor. Users can upload multiple images, which are compressed in the browser, and download them individually or as a single zip file.",
+  "name": "Smart Image Compressor",
+  "description": "A client-side image compressor that allows users to compress images to a target file size. Users can upload multiple images, which are compressed in the browser, and download them individually or as a single zip file.",
   "requestFramePermissions": []
 }

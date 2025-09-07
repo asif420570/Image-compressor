@@ -3,22 +3,12 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="google-site-verification" content="dwHTXz-jebVpHgfZKSr-s2S7eFahsB88ZqsnXCMixzY" />
-    <title>Batch Image Compressor</title>
+    <title>Smart Image Compressor</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-<script type="importmap">
-{
-  "imports": {
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.1.1/",
-    "react/": "https://aistudiocdn.com/react@^19.1.1/",
-    "react": "https://aistudiocdn.com/react@^19.1.1"
-  }
-}
-</script>
 <style>
 :root {
   --bg-main: #f4f6f8;
@@ -94,7 +84,7 @@ body {
   cursor: pointer;
 }
 
-.upload-zone:hover {
+.upload-zone:hover, .upload-zone.dragover {
   border-color: var(--color-primary);
   background-color: #f0f6ff;
 }
@@ -132,8 +122,20 @@ body {
   gap: 1rem;
   justify-content: center;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
   padding: 1.5rem;
+  background-color: #f8f9fa;
+  border-radius: 12px;
+}
+
+.global-target-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding: 1rem 1.5rem;
   background-color: #f8f9fa;
   border-radius: 12px;
 }
@@ -148,8 +150,7 @@ body {
 /* Result Card */
 .result-card {
   display: flex;
-  align-items: center;
-  gap: 1rem;
+  flex-direction: column;
   padding: 1rem;
   background-color: var(--bg-container);
   border: 1px solid var(--border-color);
@@ -160,6 +161,13 @@ body {
 
 .result-card:hover {
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.card-main-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
 }
 
 .card-thumbnail {
@@ -219,6 +227,45 @@ body {
   gap: 0.5rem;
 }
 
+/* Target Size Controls */
+.card-target-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  width: 100%;
+  padding-top: 1rem;
+  margin-top: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+.target-size-label {
+    font-size: 0.9rem;
+    color: var(--color-text-light);
+    margin-right: 0.25rem;
+}
+.target-size-input {
+    width: 80px;
+    padding: 0.4rem 0.6rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 0.9rem;
+}
+.target-unit-select {
+    padding: 0.4rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-family: inherit;
+    background-color: #fff;
+    font-size: 0.9rem;
+}
+.target-controls-buttons {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
 /* Buttons */
 .btn {
   display: inline-flex;
@@ -256,6 +303,12 @@ body {
   cursor: not-allowed;
 }
 
+.btn-small {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.875rem;
+  border-radius: 6px;
+}
+
 .btn-icon {
   background: none;
   border: none;
@@ -284,6 +337,29 @@ body {
     height: 20px;
 }
 
+/* Link-style Button */
+.btn-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-primary);
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color 0.2s;
+  white-space: nowrap;
+}
+.btn-link:hover:not(:disabled) {
+  color: var(--color-primary-hover);
+}
+.btn-link:disabled {
+  color: var(--color-text-light);
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
 
 /* Spinner */
 .spinner {
@@ -305,17 +381,6 @@ body {
   to { transform: rotate(360deg); }
 }
 
-/* Error Message */
-.error-message {
-  background-color: #f8d7da;
-  color: #721c24;
-  border: 1px solid #f5c6cb;
-  padding: 1rem;
-  border-radius: 8px;
-  margin-bottom: 2rem;
-  text-align: center;
-}
-
 /* Responsive Design */
 @media (max-width: 767px) {
   .app-container {
@@ -324,11 +389,11 @@ body {
   .upload-zone {
       padding: 1.5rem;
   }
-  .global-actions {
+  .global-actions, .global-target-controls {
       flex-direction: column;
       align-items: stretch;
   }
-  .result-card {
+  .card-main-content {
     position: relative;
     flex-wrap: wrap;
   }
@@ -351,8 +416,423 @@ body {
 }
 </style>
 </head>
-<body class="bg-gray-100 dark:bg-gray-900">
-    <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
+<body>
+    <div id="root">
+        <div class="app-container">
+            <header class="app-header">
+                <h1>Smart Image Compressor</h1>
+                <p>Compress images to a target file size. Fast, private, and free.</p>
+            </header>
+
+            <main>
+                <div id="upload-container">
+                     <div class="upload-zone" id="upload-zone">
+                        <label for="file-upload" class="upload-label">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" x2="12" y1="3" y2="15" /></svg>
+                            <span class="upload-text-main">Drag & Drop Your Images Here, or Browse Files</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div id="results-container" style="display: none;">
+                    <section class="global-actions">
+                        <button id="add-more-btn" class="btn btn-primary">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                             Add More Images
+                        </button>
+                        <button id="download-all-btn" class="btn btn-primary">
+                            <span id="download-all-default">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" x2="12" y1="15" y2="3" /></svg>
+                                Download All as ZIP
+                            </span>
+                             <span id="download-all-zipping" style="display: none;">
+                                <div class="spinner"></div> Zipping...
+                            </span>
+                        </button>
+                    </section>
+                    <section class="global-target-controls">
+                        <label for="global-target-size-input" class="target-size-label">Global Target Size:</label>
+                        <input type="number" id="global-target-size-input" class="target-size-input" value="500">
+                        <select id="global-target-unit-select" class="target-unit-select">
+                            <option value="KB" selected>KB</option>
+                            <option value="MB">MB</option>
+                        </select>
+                        <button id="apply-to-all-btn" class="btn btn-primary btn-small">Apply to All</button>
+                    </section>
+                    <section class="results-list" id="results-list"></section>
+                </div>
+            </main>
+
+            <input
+                id="file-upload"
+                type="file"
+                class="upload-input"
+                accept="image/*"
+                multiple
+            />
+        </div>
+    </div>
+    
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- DOM Elements ---
+    const fileInput = document.getElementById('file-upload');
+    const uploadZone = document.getElementById('upload-zone');
+    const uploadContainer = document.getElementById('upload-container');
+    const resultsContainer = document.getElementById('results-container');
+    const resultsList = document.getElementById('results-list');
+    const addMoreBtn = document.getElementById('add-more-btn');
+    const downloadAllBtn = document.getElementById('download-all-btn');
+    const downloadAllDefault = document.getElementById('download-all-default');
+    const downloadAllZipping = document.getElementById('download-all-zipping');
+    const globalTargetSizeInput = document.getElementById('global-target-size-input');
+    const globalTargetUnitSelect = document.getElementById('global-target-unit-select');
+    const applyToAllBtn = document.getElementById('apply-to-all-btn');
+
+
+    // --- State Management ---
+    let imageFilesState = [];
+    let nextId = 0;
+
+    // --- Helper Functions ---
+    const formatBytes = (bytes, decimals = 2) => {
+        if (!+bytes) return '0 Bytes';
+        const k = 1024;
+        const dm = decimals < 0 ? 0 : decimals;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+    };
+
+    // --- Core Application Logic ---
+    const render = () => {
+        resultsList.innerHTML = '';
+        if (imageFilesState.length === 0) {
+            uploadContainer.style.display = 'block';
+            resultsContainer.style.display = 'none';
+        } else {
+            uploadContainer.style.display = 'none';
+            resultsContainer.style.display = 'block';
+        }
+
+        imageFilesState.forEach(file => {
+            const card = document.createElement('article');
+            card.className = 'result-card';
+            card.dataset.id = file.id;
+            
+            const isCompressing = file.status === 'compressing';
+            const isDone = file.status === 'done';
+            
+            let statusHTML = '';
+            if (isCompressing) {
+                statusHTML = `<div class="spinner" aria-label="Compressing"></div>`;
+            } else if (file.status === 'error') {
+                statusHTML = `<span style="color: #721c24;">Error</span>`;
+            } else if (isDone && file.compressedFile) {
+                const savings = Math.round(100 - (file.compressedFile.size / file.originalFile.size) * 100);
+                statusHTML = `
+                    <span class="card-size-new">${formatBytes(file.compressedFile.size)}</span>
+                    <span class="card-savings">- ${savings}%</span>
+                `;
+            }
+
+            card.innerHTML = `
+                <div class="card-main-content">
+                    <img src="${file.originalUrl}" alt="${file.originalFile.name}" class="card-thumbnail" />
+                    <div class="card-details">
+                        <p class="card-filename">${file.originalFile.name}</p>
+                        <p class="card-size-orig">${formatBytes(file.originalFile.size)}</p>
+                    </div>
+                    <div class="card-status" role="status">${statusHTML}</div>
+                    <div class="card-actions">
+                        ${isDone && file.compressedUrl ? `
+                        <a href="${file.compressedUrl}" download="compressed-${file.originalFile.name}" class="btn-icon" aria-label="Download compressed image">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" x2="12" y1="15" y2="3" /></svg>
+                        </a>` : ''}
+                        <button class="btn-icon remove btn-remove" aria-label="Remove image">
+                           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                        </button>
+                    </div>
+                </div>
+                ${file.status !== 'error' ? `
+                <div class="card-target-controls">
+                    <label for="target-size-${file.id}" class="target-size-label">Target Size:</label>
+                    <input type="number" id="target-size-${file.id}" class="target-size-input" value="${file.targetSize}" ${isCompressing ? 'disabled' : ''}>
+                    <select id="target-unit-${file.id}" class="target-unit-select" ${isCompressing ? 'disabled' : ''}>
+                        <option value="KB" ${file.targetUnit === 'KB' ? 'selected' : ''}>KB</option>
+                        <option value="MB" ${file.targetUnit === 'MB' ? 'selected' : ''}>MB</option>
+                    </select>
+                    <div class="target-controls-buttons">
+                        <button class="btn btn-primary btn-small btn-apply" ${isCompressing ? 'disabled' : ''}>Apply</button>
+                        <button class="btn-link btn-reset" ${isCompressing ? 'disabled' : ''}>Reset</button>
+                    </div>
+                </div>
+                ` : ''}
+            `;
+            resultsList.appendChild(card);
+        });
+
+        updateGlobalActions();
+        attachCardListeners();
+    };
+
+    const attachCardListeners = () => {
+        document.querySelectorAll('.result-card').forEach(card => {
+            const id = parseInt(card.dataset.id, 10);
+            card.querySelector('.btn-remove').addEventListener('click', () => handleRemoveImage(id));
+            
+            const applyBtn = card.querySelector('.btn-apply');
+            if (applyBtn) {
+                applyBtn.addEventListener('click', () => {
+                    const sizeInput = card.querySelector(`#target-size-${id}`);
+                    const unitSelect = card.querySelector(`#target-unit-${id}`);
+                    const targetSize = parseFloat(sizeInput.value);
+                    const targetUnit = unitSelect.value;
+                    handleTargetSizeApply(id, targetSize, targetUnit);
+                });
+            }
+
+            const resetBtn = card.querySelector('.btn-reset');
+            if (resetBtn) {
+                resetBtn.addEventListener('click', () => handleReset(id));
+            }
+        });
+    };
+    
+    const updateGlobalActions = () => {
+        const anyCompressing = imageFilesState.some(f => f.status === 'compressing');
+        const hasFiles = imageFilesState.length > 0;
+        downloadAllBtn.disabled = anyCompressing || !hasFiles;
+        applyToAllBtn.disabled = anyCompressing || !hasFiles;
+    };
+    
+    const updateFileState = (id, updates) => {
+        const index = imageFilesState.findIndex(f => f.id === id);
+        if (index !== -1) {
+            imageFilesState[index] = { ...imageFilesState[index], ...updates };
+        }
+    };
+
+    const processFiles = (files) => {
+        const newFiles = Array.from(files).map(file => ({
+            id: nextId++,
+            originalFile: file,
+            originalUrl: URL.createObjectURL(file),
+            compressedFile: null,
+            compressedUrl: null,
+            status: 'compressing',
+            targetSize: 500,
+            targetUnit: 'KB',
+        }));
+        
+        imageFilesState = [...imageFilesState, ...newFiles];
+        render();
+
+        newFiles.forEach(file => compressWithDefaults(file.id));
+    };
+
+    const compressWithDefaults = async (id) => {
+        const fileState = imageFilesState.find(f => f.id === id);
+        if (!fileState) return;
+
+        try {
+            const compressed = await imageCompression(fileState.originalFile, {
+                maxSizeMB: 1,
+                useWebWorker: true,
+            });
+            updateFileState(id, {
+                status: 'done',
+                compressedFile: compressed,
+                compressedUrl: URL.createObjectURL(compressed),
+            });
+        } catch (e) {
+            console.error(e);
+            updateFileState(id, { status: 'error' });
+        } finally {
+            render();
+        }
+    };
+    
+    const compressToTargetSize = async (id, targetBytes) => {
+        const fileState = imageFilesState.find(f => f.id === id);
+        if (!fileState) return;
+
+        // Revoke old URL if it exists
+        if (fileState.compressedUrl) URL.revokeObjectURL(fileState.compressedUrl);
+        updateFileState(id, { status: 'compressing', compressedFile: null, compressedUrl: null });
+        render();
+
+        try {
+            let bestBlob = null;
+            // First, try a direct approach which is often good enough
+            const firstTry = await imageCompression(fileState.originalFile, {
+                maxSizeMB: targetBytes / 1024 / 1024,
+                useWebWorker: true,
+            });
+
+            if (firstTry.size <= targetBytes) {
+                bestBlob = firstTry;
+            } else {
+                // If direct approach fails, use binary search on quality
+                let minQuality = 0;
+                let maxQuality = 1;
+                let currentQuality = 0.5;
+
+                for (let i = 0; i < 8; i++) { // 8 iterations should be enough
+                    const tempBlob = await imageCompression(fileState.originalFile, {
+                         maxSizeMB: 10, // Set high to not interfere with quality
+                         initialQuality: currentQuality,
+                         useWebWorker: true,
+                    });
+
+                    if (tempBlob.size <= targetBytes) {
+                        bestBlob = tempBlob;
+                        minQuality = currentQuality;
+                    } else {
+                        maxQuality = currentQuality;
+                    }
+                    currentQuality = (minQuality + maxQuality) / 2;
+                }
+            }
+            
+            if (!bestBlob) {
+                // If still no suitable blob, use the smallest one we found, even if over target
+                bestBlob = firstTry;
+            }
+
+            updateFileState(id, {
+                status: 'done',
+                compressedFile: bestBlob,
+                compressedUrl: URL.createObjectURL(bestBlob),
+            });
+
+        } catch (e) {
+            console.error(e);
+            updateFileState(id, { status: 'error' });
+        } finally {
+            render();
+        }
+    };
+    
+    // --- Event Handlers ---
+    const handleFileChange = (event) => {
+        if (event.target.files.length > 0) {
+            processFiles(event.target.files);
+        }
+        event.target.value = ''; // Allow re-uploading same file
+    };
+
+    const handleRemoveImage = (id) => {
+        const fileToRemove = imageFilesState.find(f => f.id === id);
+        if (fileToRemove) {
+            if (fileToRemove.originalUrl) URL.revokeObjectURL(fileToRemove.originalUrl);
+            if (fileToRemove.compressedUrl) URL.revokeObjectURL(fileToRemove.compressedUrl);
+        }
+        imageFilesState = imageFilesState.filter(f => f.id !== id);
+        render();
+    };
+
+    const handleTargetSizeApply = (id, targetSize, targetUnit) => {
+        updateFileState(id, { targetSize, targetUnit });
+        const multiplier = targetUnit === 'MB' ? 1024 * 1024 : 1024;
+        const targetBytes = targetSize * multiplier;
+        compressToTargetSize(id, targetBytes);
+    };
+
+    const handleReset = (id) => {
+        const fileState = imageFilesState.find(f => f.id === id);
+        if (!fileState) return;
+
+        if (fileState.compressedUrl) URL.revokeObjectURL(fileState.compressedUrl);
+        updateFileState(id, { status: 'compressing', compressedFile: null, compressedUrl: null });
+        render();
+        compressWithDefaults(id);
+    };
+
+    const handleApplyToAll = () => {
+        const targetSize = parseFloat(globalTargetSizeInput.value);
+        const targetUnit = globalTargetUnitSelect.value;
+        
+        if (isNaN(targetSize) || targetSize <= 0) {
+            alert("Please enter a valid target size.");
+            return;
+        }
+
+        const multiplier = targetUnit === 'MB' ? 1024 * 1024 : 1024;
+        const targetBytes = targetSize * multiplier;
+        
+        imageFilesState.forEach(file => {
+            // Update state with new target values before calling compress
+            updateFileState(file.id, { targetSize, targetUnit });
+            compressToTargetSize(file.id, targetBytes);
+        });
+    };
+
+    const handleDownloadAll = async () => {
+        const btnDefault = downloadAllBtn.querySelector('#download-all-default');
+        const btnZipping = downloadAllBtn.querySelector('#download-all-zipping');
+
+        btnDefault.style.display = 'none';
+        btnZipping.style.display = 'inline-flex';
+        downloadAllBtn.disabled = true;
+
+        const zip = new JSZip();
+        imageFilesState.forEach(file => {
+            if (file.status === 'done' && file.compressedFile) {
+                zip.file(`compressed-${file.originalFile.name}`, file.compressedFile);
+            }
+        });
+
+        try {
+            const content = await zip.generateAsync({ type: 'blob' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(content);
+            link.download = 'compressed-images.zip';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+        } catch(e) {
+            console.error(e);
+            alert("Failed to create zip file.");
+        } finally {
+            btnDefault.style.display = 'inline-flex';
+            btnZipping.style.display = 'none';
+            updateGlobalActions();
+        }
+    };
+
+    // --- Setup Event Listeners ---
+    fileInput.addEventListener('change', handleFileChange);
+    addMoreBtn.addEventListener('click', () => fileInput.click());
+    downloadAllBtn.addEventListener('click', handleDownloadAll);
+    applyToAllBtn.addEventListener('click', handleApplyToAll);
+
+
+    // Drag and Drop
+    uploadZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadZone.classList.add('dragover');
+    });
+    uploadZone.addEventListener('dragleave', () => {
+        uploadZone.classList.remove('dragover');
+    });
+    uploadZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadZone.classList.remove('dragover');
+        if (e.dataTransfer.files.length > 0) {
+            processFiles(e.dataTransfer.files);
+        }
+    });
+
+    // Cleanup object URLs on page leave
+    window.addEventListener('beforeunload', () => {
+        imageFilesState.forEach(file => {
+            if (file.originalUrl) URL.revokeObjectURL(file.originalUrl);
+            if (file.compressedUrl) URL.revokeObjectURL(file.compressedUrl);
+        });
+    });
+});
+</script>
 </body>
 </html>
