@@ -1,5 +1,5 @@
 {
-  "name": "React Image Compressor",
-  "description": "A client-side image compressor built with React and Tailwind CSS. Users can upload an image, adjust the compression quality, and download the optimized version.",
+  "name": "Batch Image Compressor",
+  "description": "A client-side batch image compressor. Users can upload multiple images, which are compressed in the browser, and download them individually or as a single zip file.",
   "requestFramePermissions": []
 }
