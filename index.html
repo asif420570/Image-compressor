@@ -46,7 +46,7 @@ body {
 
 .app-container {
   width: 100%;
-  max-width: 800px;
+  max-width: 960px;
   background-color: var(--bg-container);
   border-radius: 16px;
   box-shadow: var(--shadow);
@@ -147,14 +147,16 @@ body {
   gap: 1rem;
 }
 
-/* Result Card */
+/* Result Card - NEW STYLES */
 .result-card {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
   padding: 1rem;
   background-color: var(--bg-container);
   border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
   transition: box-shadow 0.3s;
 }
@@ -163,17 +165,18 @@ body {
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
-.card-main-content {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  width: 100%;
+.card-file-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-grow: 1;
+    min-width: 0; /* Important for ellipsis */
 }
 
 .card-thumbnail {
   width: 60px;
   height: 60px;
-  border-radius: 6px;
+  border-radius: 8px;
   object-fit: cover;
   flex-shrink: 0;
   background-color: #e9ecef;
@@ -182,6 +185,9 @@ body {
 .card-details {
   flex-grow: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
 }
 
 .card-filename {
@@ -189,22 +195,15 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 250px;
 }
 
-.card-size-orig {
-  font-size: 0.85rem;
-  color: var(--color-text-light);
-}
-
-.card-status {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  width: 150px;
-  flex-shrink: 0;
-  justify-content: flex-start;
-  font-size: 0.9rem;
+.card-size-details {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--color-text-light);
 }
 
 .card-size-new {
@@ -213,7 +212,7 @@ body {
 }
 
 .card-savings {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   background-color: var(--color-success);
   color: white;
   padding: 0.1rem 0.5rem;
@@ -221,30 +220,50 @@ body {
   font-weight: 600;
 }
 
+.card-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.75rem;
+    flex-shrink: 0;
+}
+
+.card-status-and-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 36px;
+}
+
+.card-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.card-status svg, .card-status .spinner {
+    width: 20px;
+    height: 20px;
+}
+
 .card-actions {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.25rem;
 }
 
 /* Target Size Controls */
 .card-target-controls {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  width: 100%;
-  padding-top: 1rem;
-  margin-top: 1rem;
-  border-top: 1px solid var(--border-color);
+  flex-wrap: nowrap;
+  gap: 0.5rem;
 }
+
 .target-size-label {
-    font-size: 0.9rem;
-    color: var(--color-text-light);
-    margin-right: 0.25rem;
+    display: none;
 }
 .target-size-input {
-    width: 80px;
+    width: 70px;
     padding: 0.4rem 0.6rem;
     border: 1px solid var(--border-color);
     border-radius: 6px;
@@ -260,10 +279,9 @@ body {
     font-size: 0.9rem;
 }
 .target-controls-buttons {
-    margin-left: auto;
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.5rem;
 }
 
 /* Buttons */
@@ -393,25 +411,28 @@ body {
       flex-direction: column;
       align-items: stretch;
   }
-  .card-main-content {
-    position: relative;
+  
+  .result-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .card-controls {
+    align-items: flex-start;
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
     flex-wrap: wrap;
+    gap: 1rem;
   }
-  .card-details {
-    width: calc(100% - 76px); /* Full width minus thumbnail and gap */
+
+  .card-status-and-actions {
+    order: 2;
   }
-  .card-status {
-      width: 100%;
-      order: 3;
-      margin-top: 0.5rem;
-  }
-  .card-actions {
-    position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
-  }
-  .card-filename {
-    max-width: 100%;
+
+  .card-target-controls {
+    order: 1;
   }
 }
 </style>
@@ -522,52 +543,63 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const isCompressing = file.status === 'compressing';
             const isDone = file.status === 'done';
-            
+            const isError = file.status === 'error';
+
             let statusHTML = '';
             if (isCompressing) {
                 statusHTML = `<div class="spinner" aria-label="Compressing"></div>`;
-            } else if (file.status === 'error') {
-                statusHTML = `<span style="color: #721c24;">Error</span>`;
-            } else if (isDone && file.compressedFile) {
+            } else if (isError) {
+                statusHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#dc3545" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" title="Error compressing image" aria-label="Error"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
+            }
+
+            let sizeDetailsHTML = `<span class="card-size-orig">${formatBytes(file.originalFile.size)}</span>`;
+            if (isDone && file.compressedFile) {
                 const savings = Math.round(100 - (file.compressedFile.size / file.originalFile.size) * 100);
-                statusHTML = `
+                sizeDetailsHTML += `
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px; height:16px; color: var(--color-text-light);"><polyline points="13 17 18 12 13 7"></polyline><polyline points="6 17 11 12 6 7"></polyline></svg>
                     <span class="card-size-new">${formatBytes(file.compressedFile.size)}</span>
                     <span class="card-savings">- ${savings}%</span>
                 `;
             }
 
             card.innerHTML = `
-                <div class="card-main-content">
+                <div class="card-file-info">
                     <img src="${file.originalUrl}" alt="${file.originalFile.name}" class="card-thumbnail" />
                     <div class="card-details">
-                        <p class="card-filename">${file.originalFile.name}</p>
-                        <p class="card-size-orig">${formatBytes(file.originalFile.size)}</p>
-                    </div>
-                    <div class="card-status" role="status">${statusHTML}</div>
-                    <div class="card-actions">
-                        ${isDone && file.compressedUrl ? `
-                        <a href="${file.compressedUrl}" download="compressed-${file.originalFile.name}" class="btn-icon" aria-label="Download compressed image">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" x2="12" y1="15" y2="3" /></svg>
-                        </a>` : ''}
-                        <button class="btn-icon remove btn-remove" aria-label="Remove image">
-                           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
-                        </button>
+                        <p class="card-filename" title="${file.originalFile.name}">${file.originalFile.name}</p>
+                        <div class="card-size-details">
+                            ${sizeDetailsHTML}
+                        </div>
                     </div>
                 </div>
-                ${file.status !== 'error' ? `
-                <div class="card-target-controls">
-                    <label for="target-size-${file.id}" class="target-size-label">Target Size:</label>
-                    <input type="number" id="target-size-${file.id}" class="target-size-input" value="${file.targetSize}" ${isCompressing ? 'disabled' : ''}>
-                    <select id="target-unit-${file.id}" class="target-unit-select" ${isCompressing ? 'disabled' : ''}>
-                        <option value="KB" ${file.targetUnit === 'KB' ? 'selected' : ''}>KB</option>
-                        <option value="MB" ${file.targetUnit === 'MB' ? 'selected' : ''}>MB</option>
-                    </select>
-                    <div class="target-controls-buttons">
-                        <button class="btn btn-primary btn-small btn-apply" ${isCompressing ? 'disabled' : ''}>Apply</button>
-                        <button class="btn-link btn-reset" ${isCompressing ? 'disabled' : ''}>Reset</button>
+                
+                <div class="card-controls">
+                    ${!isError ? `
+                    <div class="card-target-controls">
+                        <input type="number" id="target-size-${file.id}" class="target-size-input" value="${file.targetSize}" ${isCompressing ? 'disabled' : ''} aria-label="Target size">
+                        <select id="target-unit-${file.id}" class="target-unit-select" ${isCompressing ? 'disabled' : ''} aria-label="Target unit">
+                            <option value="KB" ${file.targetUnit === 'KB' ? 'selected' : ''}>KB</option>
+                            <option value="MB" ${file.targetUnit === 'MB' ? 'selected' : ''}>MB</option>
+                        </select>
+                        <div class="target-controls-buttons">
+                            <button class="btn btn-primary btn-small btn-apply" ${isCompressing ? 'disabled' : ''}>Apply</button>
+                            <button class="btn-link btn-reset" ${isCompressing ? 'disabled' : ''}>Reset</button>
+                        </div>
+                    </div>` : '<div></div>' /* Placeholder to keep alignment */}
+
+                    <div class="card-status-and-actions">
+                        <div class="card-status" role="status">${statusHTML}</div>
+                        <div class="card-actions">
+                            ${isDone && file.compressedUrl ? `
+                            <a href="${file.compressedUrl}" download="compressed-${file.originalFile.name}" class="btn-icon" title="Download compressed image" aria-label="Download compressed image">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" x2="12" y1="15" y2="3" /></svg>
+                            </a>` : ''}
+                            <button class="btn-icon remove btn-remove" title="Remove image" aria-label="Remove image">
+                               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
-                ` : ''}
             `;
             resultsList.appendChild(card);
         });
