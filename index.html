@@ -286,6 +286,7 @@ body {
 
 /* Buttons */
 .btn {
+  position: relative; /* For badge positioning */
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -394,6 +395,25 @@ body {
   border-top-color: #fff;
 }
 
+/* Badge */
+.badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: var(--color-primary-hover);
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: none; /* Hidden by default */
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  border: 2px solid white;
+}
 
 @keyframes spin {
   to { transform: rotate(360deg); }
@@ -465,6 +485,7 @@ body {
                             <span id="download-all-default">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" x2="12" y1="15" y2="3" /></svg>
                                 Download All as ZIP
+                                <span id="download-count-badge" class="badge"></span>
                             </span>
                              <span id="download-all-zipping" style="display: none;">
                                 <div class="spinner"></div> Zipping...
@@ -506,6 +527,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const downloadAllBtn = document.getElementById('download-all-btn');
     const downloadAllDefault = document.getElementById('download-all-default');
     const downloadAllZipping = document.getElementById('download-all-zipping');
+    const downloadCountBadge = document.getElementById('download-count-badge');
     const globalTargetSizeInput = document.getElementById('global-target-size-input');
     const globalTargetUnitSelect = document.getElementById('global-target-unit-select');
     const applyToAllBtn = document.getElementById('apply-to-all-btn');
@@ -516,16 +538,23 @@ document.addEventListener('DOMContentLoaded', () => {
     let nextId = 0;
 
     // --- Helper Functions ---
-    const formatBytes = (bytes, decimals = 2) => {
-        if (!+bytes) return '0 Bytes';
+    const formatBytes = (bytes) => {
+        if (!+bytes) return '0.00 KB';
         const k = 1024;
-        const dm = decimals < 0 ? 0 : decimals;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+        return `${(bytes / k).toFixed(2)} KB`;
     };
 
     // --- Core Application Logic ---
+    const updateDownloadAllBadge = () => {
+        const readyToDownloadCount = imageFilesState.filter(f => f.status === 'done' && f.compressedFile).length;
+        if (readyToDownloadCount > 0) {
+            downloadCountBadge.textContent = readyToDownloadCount;
+            downloadCountBadge.style.display = 'flex';
+        } else {
+            downloadCountBadge.style.display = 'none';
+        }
+    };
+
     const render = () => {
         resultsList.innerHTML = '';
         if (imageFilesState.length === 0) {
@@ -605,6 +634,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         updateGlobalActions();
+        updateDownloadAllBadge();
         attachCardListeners();
     };
 
@@ -633,9 +663,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const updateGlobalActions = () => {
         const anyCompressing = imageFilesState.some(f => f.status === 'compressing');
-        const hasFiles = imageFilesState.length > 0;
-        downloadAllBtn.disabled = anyCompressing || !hasFiles;
-        applyToAllBtn.disabled = anyCompressing || !hasFiles;
+        const anyDone = imageFilesState.some(f => f.status === 'done');
+        downloadAllBtn.disabled = anyCompressing || !anyDone;
+        applyToAllBtn.disabled = anyCompressing;
     };
     
     const updateFileState = (id, updates) => {
