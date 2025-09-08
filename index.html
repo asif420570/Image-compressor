@@ -72,9 +72,9 @@ body {
   margin-top: 0.5rem;
 }
 
-/* Upload Zone */
+/* Upload Zone - UPDATED STYLES */
 .upload-zone {
-  border: 2px dashed var(--border-dashed);
+  border: 2px dashed transparent;
   border-radius: 12px;
   padding: 3rem;
   text-align: center;
@@ -82,6 +82,11 @@ body {
   transition: border-color 0.3s, background-color 0.3s;
   margin-bottom: 2rem;
   cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
 }
 
 .upload-zone:hover, .upload-zone.dragover {
@@ -89,26 +94,9 @@ body {
   background-color: #f0f6ff;
 }
 
-.upload-label {
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  color: var(--color-text-light);
-}
-
-.upload-label svg {
-  width: 48px;
-  height: 48px;
-  color: var(--color-primary);
-  margin-bottom: 0.5rem;
-}
-
-.upload-text-main {
-  font-weight: 500;
-  color: var(--color-text);
-  font-size: 1.1rem;
+.upload-hint {
+    color: var(--color-text-light);
+    font-size: 0.9rem;
 }
 
 .upload-input {
@@ -322,6 +310,18 @@ body {
   cursor: not-allowed;
 }
 
+/* Prominent Upload Button Style */
+#select-images-btn {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    border-radius: 10px;
+}
+#select-images-btn svg {
+    width: 24px;
+    height: 24px;
+}
+
+
 .btn-small {
   padding: 0.4rem 0.8rem;
   font-size: 0.875rem;
@@ -533,10 +533,11 @@ body {
             <main>
                 <div id="upload-container">
                      <div class="upload-zone" id="upload-zone">
-                        <label for="file-upload" class="upload-label">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" x2="12" y1="3" y2="15" /></svg>
-                            <span class="upload-text-main">Drag & Drop Your Images Here, or Browse Files</span>
-                        </label>
+                        <button id="select-images-btn" class="btn btn-primary">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                            Select Images
+                        </button>
+                        <p class="upload-hint">or drop images here</p>
                     </div>
                 </div>
 
@@ -981,6 +982,8 @@ document.addEventListener('DOMContentLoaded', () => {
     downloadAllBtn.addEventListener('click', handleDownloadAll);
     applyToAllBtn.addEventListener('click', handleApplyToAll);
 
+    // Make the entire upload zone clickable to open the file dialog
+    uploadZone.addEventListener('click', () => fileInput.click());
 
     // Drag and Drop
     uploadZone.addEventListener('dragover', (e) => {
