@@ -637,8 +637,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultsList = document.getElementById('results-list');
     const addMoreBtn = document.getElementById('add-more-btn');
     const downloadAllBtn = document.getElementById('download-all-btn');
-    const downloadAllDefault = document.getElementById('download-all-default');
-    const downloadAllZipping = document.getElementById('download-all-zipping');
     const downloadCountBadge = document.getElementById('download-count-badge');
     const globalTargetSizeInput = document.getElementById('global-target-size-input');
     const globalTargetUnitSelect = document.getElementById('global-target-unit-select');
@@ -650,32 +648,41 @@ document.addEventListener('DOMContentLoaded', () => {
     let nextId = 0;
 
     // --- Helper Functions ---
+    /**
+     * Formats a number of bytes into a human-readable string (e.g., "150.25 KB").
+     * @param {number} bytes - The number of bytes.
+     * @returns {string} The formatted file size string.
+     */
     const formatBytes = (bytes) => {
         if (!+bytes) return '0.00 KB';
         const k = 1024;
         return `${(bytes / k).toFixed(2)} KB`;
     };
 
-    // --- Core Application Logic ---
-    const updateDownloadAllBadge = () => {
-        const readyToDownloadCount = imageFilesState.filter(f => f.status === 'done' && f.compressedFile).length;
-        if (readyToDownloadCount > 0) {
-            downloadCountBadge.textContent = readyToDownloadCount;
-            downloadCountBadge.style.display = 'flex';
-        } else {
-            downloadCountBadge.style.display = 'none';
+    /**
+     * Updates a specific file's state in the global state array.
+     * @param {number} id - The ID of the file to update.
+     * @param {object} updates - An object containing the properties to update.
+     */
+    const updateFileState = (id, updates) => {
+        const index = imageFilesState.findIndex(f => f.id === id);
+        if (index !== -1) {
+            imageFilesState[index] = { ...imageFilesState[index], ...updates };
         }
     };
+    
+    // --- Core Application Logic ---
 
+    /**
+     * Renders the entire list of image cards based on the current state.
+     * This function is responsible for all DOM updates within the results list.
+     */
     const render = () => {
-        resultsList.innerHTML = '';
-        if (imageFilesState.length === 0) {
-            uploadContainer.style.display = 'block';
-            resultsContainer.style.display = 'none';
-        } else {
-            uploadContainer.style.display = 'none';
-            resultsContainer.style.display = 'block';
-        }
+        resultsList.innerHTML = ''; // Clear previous results
+        
+        const hasFiles = imageFilesState.length > 0;
+        uploadContainer.style.display = hasFiles ? 'none' : 'block';
+        resultsContainer.style.display = hasFiles ? 'block' : 'none';
 
         imageFilesState.forEach(file => {
             const card = document.createElement('article');
@@ -708,9 +715,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <img src="${file.originalUrl}" alt="${file.originalFile.name}" class="card-thumbnail" />
                     <div class="card-details">
                         <p class="card-filename" title="${file.originalFile.name}">${file.originalFile.name}</p>
-                        <div class="card-size-details">
-                            ${sizeDetailsHTML}
-                        </div>
+                        <div class="card-size-details">${sizeDetailsHTML}</div>
                     </div>
                 </div>
                 
@@ -726,7 +731,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <button class="btn btn-primary btn-small btn-apply" ${isCompressing ? 'disabled' : ''}>Apply</button>
                             <button class="btn-link btn-reset" ${isCompressing ? 'disabled' : ''}>Reset</button>
                         </div>
-                    </div>` : '<div></div>' /* Placeholder to keep alignment */}
+                    </div>` : '<div></div>'}
 
                     <div class="card-status-and-actions">
                         <div class="card-status" role="status">${statusHTML}</div>
@@ -745,11 +750,14 @@ document.addEventListener('DOMContentLoaded', () => {
             resultsList.appendChild(card);
         });
 
-        updateGlobalActions();
-        updateDownloadAllBadge();
+        updateGlobalUI();
         attachCardListeners();
     };
 
+    /**
+     * Attaches event listeners to all buttons on the dynamically generated result cards.
+     * This is called after each render to ensure new elements are interactive.
+     */
     const attachCardListeners = () => {
         document.querySelectorAll('.result-card').forEach(card => {
             const id = parseInt(card.dataset.id, 10);
@@ -760,9 +768,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 applyBtn.addEventListener('click', () => {
                     const sizeInput = card.querySelector(`#target-size-${id}`);
                     const unitSelect = card.querySelector(`#target-unit-${id}`);
-                    const targetSize = parseFloat(sizeInput.value);
-                    const targetUnit = unitSelect.value;
-                    handleTargetSizeApply(id, targetSize, targetUnit);
+                    handleTargetSizeApply(id, parseFloat(sizeInput.value), unitSelect.value);
                 });
             }
 
@@ -773,20 +779,43 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
     
-    const updateGlobalActions = () => {
+    /**
+     * Updates the state of global action buttons (e.g., "Download All") and the badge count.
+     */
+    const updateGlobalUI = () => {
+        // Update button states
         const anyCompressing = imageFilesState.some(f => f.status === 'compressing');
         const anyDone = imageFilesState.some(f => f.status === 'done');
         downloadAllBtn.disabled = anyCompressing || !anyDone;
         applyToAllBtn.disabled = anyCompressing;
-    };
-    
-    const updateFileState = (id, updates) => {
-        const index = imageFilesState.findIndex(f => f.id === id);
-        if (index !== -1) {
-            imageFilesState[index] = { ...imageFilesState[index], ...updates };
+        
+        // Update download badge
+        const readyToDownloadCount = imageFilesState.filter(f => f.status === 'done' && f.compressedFile).length;
+        if (readyToDownloadCount > 0) {
+            downloadCountBadge.textContent = readyToDownloadCount;
+            downloadCountBadge.style.display = 'flex';
+        } else {
+            downloadCountBadge.style.display = 'none';
         }
     };
+    
+    /**
+     * Starts the compression process for a specific image based on its state.
+     * @param {number} id - The ID of the file to compress.
+     */
+    const runCompressionForId = (id) => {
+        const fileState = imageFilesState.find(f => f.id === id);
+        if (!fileState) return;
 
+        const multiplier = fileState.targetUnit === 'MB' ? 1024 * 1024 : 1024;
+        const targetBytes = fileState.targetSize * multiplier;
+        compressToTargetSize(id, targetBytes);
+    };
+
+    /**
+     * Takes a list of File objects, adds them to the state, and starts compression.
+     * @param {FileList} files - The list of files from a file input or drop event.
+     */
     const processFiles = (files) => {
         const newFiles = Array.from(files).map(file => ({
             id: nextId++,
@@ -795,93 +824,64 @@ document.addEventListener('DOMContentLoaded', () => {
             compressedFile: null,
             compressedUrl: null,
             status: 'compressing',
-            targetSize: 500,
+            targetSize: 500, // Default target size
             targetUnit: 'KB',
         }));
         
-        imageFilesState = [...imageFilesState, ...newFiles];
+        imageFilesState.push(...newFiles);
         render();
 
-        newFiles.forEach(file => compressWithDefaults(file.id));
-    };
-
-    const compressWithDefaults = async (id) => {
-        const fileState = imageFilesState.find(f => f.id === id);
-        if (!fileState) return;
-
-        try {
-            const compressed = await imageCompression(fileState.originalFile, {
-                maxSizeMB: 1,
-                useWebWorker: true,
-            });
-            updateFileState(id, {
-                status: 'done',
-                compressedFile: compressed,
-                compressedUrl: URL.createObjectURL(compressed),
-            });
-        } catch (e) {
-            console.error(e);
-            updateFileState(id, { status: 'error' });
-        } finally {
-            render();
-        }
+        newFiles.forEach(file => runCompressionForId(file.id));
     };
     
+    /**
+     * Compresses an image to a target file size in bytes.
+     * This function uses a two-step strategy to ensure the best possible result:
+     * 1. It first attempts a direct compression to the target size. This is fast and
+     *    effective for reachable targets.
+     * 2. If the result from step 1 is still larger than the target (i.e., the target
+     *    was unreachable), it performs a second, aggressive compression with very low
+     *    quality to get the absolute smallest file size possible as a fallback.
+     * @param {number} id - The ID of the file in the state.
+     * @param {number} targetBytes - The target size in bytes.
+     */
     const compressToTargetSize = async (id, targetBytes) => {
         const fileState = imageFilesState.find(f => f.id === id);
         if (!fileState) return;
 
-        // Revoke old URL if it exists
+        // Revoke any old object URLs to prevent memory leaks
         if (fileState.compressedUrl) URL.revokeObjectURL(fileState.compressedUrl);
+
         updateFileState(id, { status: 'compressing', compressedFile: null, compressedUrl: null });
         render();
 
         try {
-            let bestBlob = null;
-            // First, try a direct approach which is often good enough
-            const firstTry = await imageCompression(fileState.originalFile, {
-                maxSizeMB: targetBytes / 1024 / 1024,
+            let resultBlob;
+            
+            // Step 1: Attempt to compress to the target size directly.
+            const directAttemptBlob = await imageCompression(fileState.originalFile, {
+                maxSizeMB: targetBytes / (1024 * 1024),
                 useWebWorker: true,
             });
 
-            if (firstTry.size <= targetBytes) {
-                bestBlob = firstTry;
+            // Step 2: If the target was unreachable (result is > target), perform an
+            // aggressive compression to get the smallest possible file as a fallback.
+            if (directAttemptBlob.size > targetBytes) {
+                resultBlob = await imageCompression(fileState.originalFile, {
+                    initialQuality: 0.01, // Aggressive 99% quality reduction
+                    useWebWorker: true,
+                });
             } else {
-                // If direct approach fails, use binary search on quality
-                let minQuality = 0;
-                let maxQuality = 1;
-                let currentQuality = 0.5;
-
-                for (let i = 0; i < 8; i++) { // 8 iterations should be enough
-                    const tempBlob = await imageCompression(fileState.originalFile, {
-                         maxSizeMB: 10, // Set high to not interfere with quality
-                         initialQuality: currentQuality,
-                         useWebWorker: true,
-                    });
-
-                    if (tempBlob.size <= targetBytes) {
-                        bestBlob = tempBlob;
-                        minQuality = currentQuality;
-                    } else {
-                        maxQuality = currentQuality;
-                    }
-                    currentQuality = (minQuality + maxQuality) / 2;
-                }
-            }
-            
-            if (!bestBlob) {
-                // If still no suitable blob, use the smallest one we found, even if over target
-                bestBlob = firstTry;
+                resultBlob = directAttemptBlob; // Target was reached.
             }
 
             updateFileState(id, {
                 status: 'done',
-                compressedFile: bestBlob,
-                compressedUrl: URL.createObjectURL(bestBlob),
+                compressedFile: resultBlob,
+                compressedUrl: URL.createObjectURL(resultBlob),
             });
-
         } catch (e) {
-            console.error(e);
+            console.error("Compression failed for file ID " + id + ":", e);
             updateFileState(id, { status: 'error' });
         } finally {
             render();
@@ -893,7 +893,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (event.target.files.length > 0) {
             processFiles(event.target.files);
         }
-        event.target.value = ''; // Allow re-uploading same file
+        event.target.value = ''; // Allow re-uploading the same file
     };
 
     const handleRemoveImage = (id) => {
@@ -907,20 +907,20 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const handleTargetSizeApply = (id, targetSize, targetUnit) => {
+        if (isNaN(targetSize) || targetSize <= 0) {
+            alert("Please enter a valid, positive target size.");
+            return;
+        }
         updateFileState(id, { targetSize, targetUnit });
-        const multiplier = targetUnit === 'MB' ? 1024 * 1024 : 1024;
-        const targetBytes = targetSize * multiplier;
-        compressToTargetSize(id, targetBytes);
+        runCompressionForId(id);
     };
 
     const handleReset = (id) => {
-        const fileState = imageFilesState.find(f => f.id === id);
-        if (!fileState) return;
-
-        if (fileState.compressedUrl) URL.revokeObjectURL(fileState.compressedUrl);
-        updateFileState(id, { status: 'compressing', compressedFile: null, compressedUrl: null });
-        render();
-        compressWithDefaults(id);
+        updateFileState(id, { 
+            targetSize: 500, // Default size
+            targetUnit: 'KB'  // Default unit
+        });
+        runCompressionForId(id);
     };
 
     const handleApplyToAll = () => {
@@ -928,36 +928,32 @@ document.addEventListener('DOMContentLoaded', () => {
         const targetUnit = globalTargetUnitSelect.value;
         
         if (isNaN(targetSize) || targetSize <= 0) {
-            alert("Please enter a valid target size.");
+            alert("Please enter a valid, positive target size.");
             return;
         }
-
-        const multiplier = targetUnit === 'MB' ? 1024 * 1024 : 1024;
-        const targetBytes = targetSize * multiplier;
         
         imageFilesState.forEach(file => {
-            // Update state with new target values before calling compress
-            updateFileState(file.id, { targetSize, targetUnit });
-            compressToTargetSize(file.id, targetBytes);
+            // No need to re-run if settings are already the same
+            if (file.targetSize !== targetSize || file.targetUnit !== targetUnit) {
+                 updateFileState(file.id, { targetSize, targetUnit });
+                 runCompressionForId(file.id);
+            }
         });
     };
 
     const handleDownloadAll = async () => {
-        const btnDefault = downloadAllBtn.querySelector('#download-all-default');
-        const btnZipping = downloadAllBtn.querySelector('#download-all-zipping');
-
-        btnDefault.style.display = 'none';
-        btnZipping.style.display = 'inline-flex';
+        downloadAllDefault.style.display = 'none';
+        downloadAllZipping.style.display = 'inline-flex';
         downloadAllBtn.disabled = true;
 
-        const zip = new JSZip();
-        imageFilesState.forEach(file => {
-            if (file.status === 'done' && file.compressedFile) {
-                zip.file(`compressed-${file.originalFile.name}`, file.compressedFile);
-            }
-        });
-
         try {
+            const zip = new JSZip();
+            imageFilesState
+                .filter(file => file.status === 'done' && file.compressedFile)
+                .forEach(file => {
+                    zip.file(`compressed-${file.originalFile.name}`, file.compressedFile);
+                });
+
             const content = await zip.generateAsync({ type: 'blob' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(content);
@@ -967,47 +963,50 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.removeChild(link);
             URL.revokeObjectURL(link.href);
         } catch(e) {
-            console.error(e);
-            alert("Failed to create zip file.");
+            console.error("Failed to create zip file:", e);
+            alert("An error occurred while creating the zip file.");
         } finally {
-            btnDefault.style.display = 'inline-flex';
-            btnZipping.style.display = 'none';
-            updateGlobalActions();
+            downloadAllDefault.style.display = 'inline-flex';
+            downloadAllZipping.style.display = 'none';
+            updateGlobalUI();
         }
     };
 
     // --- Setup Event Listeners ---
-    fileInput.addEventListener('change', handleFileChange);
-    addMoreBtn.addEventListener('click', () => fileInput.click());
-    downloadAllBtn.addEventListener('click', handleDownloadAll);
-    applyToAllBtn.addEventListener('click', handleApplyToAll);
-
-    // Make the entire upload zone clickable to open the file dialog
-    uploadZone.addEventListener('click', () => fileInput.click());
-
-    // Drag and Drop
-    uploadZone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        uploadZone.classList.add('dragover');
-    });
-    uploadZone.addEventListener('dragleave', () => {
-        uploadZone.classList.remove('dragover');
-    });
-    uploadZone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        uploadZone.classList.remove('dragover');
-        if (e.dataTransfer.files.length > 0) {
-            processFiles(e.dataTransfer.files);
-        }
-    });
-
-    // Cleanup object URLs on page leave
-    window.addEventListener('beforeunload', () => {
-        imageFilesState.forEach(file => {
-            if (file.originalUrl) URL.revokeObjectURL(file.originalUrl);
-            if (file.compressedUrl) URL.revokeObjectURL(file.compressedUrl);
+    const setupListeners = () => {
+        fileInput.addEventListener('change', handleFileChange);
+        addMoreBtn.addEventListener('click', () => fileInput.click());
+        downloadAllBtn.addEventListener('click', handleDownloadAll);
+        applyToAllBtn.addEventListener('click', handleApplyToAll);
+        
+        // Click and Drag-and-Drop for the upload zone
+        uploadZone.addEventListener('click', () => fileInput.click());
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
         });
-    });
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length > 0) {
+                processFiles(e.dataTransfer.files);
+            }
+        });
+
+        // Cleanup object URLs on page leave to prevent memory leaks
+        window.addEventListener('beforeunload', () => {
+            imageFilesState.forEach(file => {
+                if (file.originalUrl) URL.revokeObjectURL(file.originalUrl);
+                if (file.compressedUrl) URL.revokeObjectURL(file.compressedUrl);
+            });
+        });
+    };
+    
+    // --- App Initialization ---
+    setupListeners();
 });
 </script>
 </body>
