@@ -1,10 +1,7 @@
-# Redirect rule for netlify subdomain to custom domain
-
 [[redirects]]
-  from = "simpleimagecompressor.netlify.app"
+  from = "/*"
   to = "https://simplecompress.com/:splat"
   status = 301
   force = true
   [redirects.conditions]
     host = "simpleimagecompressor.netlify.app"
-
