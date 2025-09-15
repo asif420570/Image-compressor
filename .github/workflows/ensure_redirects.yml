@@ -16,15 +16,15 @@ jobs:
 
       - name: Check for _redirects file and create if it does not exist
         run: |
-          if [ ! -f "_redirects" ]; then
-            echo "Redirects file not found. Creating it now..."
-            echo "/* https://simplecompress.com/:splat 301!" > _redirects
+          if [ ! -f "public/_redirects" ]; then
+            echo "Redirects file not found. Creating it in public/ folder now..."
+            echo "/* https://simplecompress.com/:splat 301!" > public/_redirects
           else
-            echo "Redirects file already exists. No action needed."
+            echo "Redirects file already exists in public/ folder. No action needed."
           fi
 
       - name: Commit and push the _redirects file if it was created
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "ci: Automatically create missing _redirects file"
-          file_pattern: _redirects
+          file_pattern: public/_redirects
