@@ -1,0 +1,31 @@
+name: Ensure _redirects File Exists
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  create-redirects-file:
+    runs-on: ubuntu-latest
+    # Replying permission to the job to be able to save the file
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check for _redirects file and create if it does not exist
+        run: |
+          if [ ! -f "_redirects" ]; then
+            echo "Redirects file not found. Creating it now..."
+            echo "/* https://simplecompress.com/:splat 301!" > _redirects
+          else
+            echo "Redirects file already exists. No action needed."
+          fi
+
+      - name: Commit and push the _redirects file if it was created
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "ci: Automatically create missing _redirects file"
+          file_pattern: _redirects
