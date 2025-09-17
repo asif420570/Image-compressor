@@ -65,6 +65,17 @@ body {
   font-size: 2.25rem;
   font-weight: 700;
   color: var(--color-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.header-logo {
+  width: 1.4em;
+  height: 1.4em;
+  color: var(--color-primary);
+  flex-shrink: 0;
 }
 
 .app-header p {
@@ -527,7 +538,13 @@ body {
     <div id="root">
         <div class="app-container">
             <header class="app-header">
-                <h1>Simple Image Compressor</h1>
+                <h1>
+                    <svg class="header-logo" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+                        <rect width="32" height="32" rx="6" fill="currentColor"/>
+                        <path fill="white" d="M5 12L12 5h-4l-3 3z M20 5l7 7h-4l-3-4z M27 20l-7 7v-4l4-3z M12 27l-7-7h4l3 4z"/>
+                    </svg>
+                    <span>Simple Image Compressor</span>
+                </h1>
                 <p>Compress images to a target file size. Fast, private, and free.</p>
             </header>
 
