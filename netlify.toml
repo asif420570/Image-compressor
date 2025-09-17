@@ -1,0 +1,5 @@
+[[redirects]]
+  from = "https://simpleimagecompressor.netlify.app/*"
+  to = "https://simplecompress.com/:splat"
+  status = 301
+  force = true
