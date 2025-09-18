@@ -38,20 +38,14 @@ body {
 }
 
 #root {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  min-height: 100vh;
-  padding: 2rem 1rem;
+  /* This is a mounting point; layout is handled by app-container */
 }
 
 .app-container {
   width: 100%;
-  max-width: 960px;
+  min-height: 100vh;
   background-color: var(--bg-container);
-  border-radius: 16px;
-  box-shadow: var(--shadow);
-  padding: 2rem;
+  padding: clamp(1.5rem, 4vw, 2.5rem);
   transition: all 0.3s ease-in-out;
 }
 
@@ -433,9 +427,6 @@ body {
 
 /* Responsive Design */
 @media (max-width: 767px) {
-  .app-container {
-    padding: 1.5rem;
-  }
   .upload-zone {
       padding: 1.5rem;
   }
