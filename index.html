@@ -45,7 +45,7 @@ body {
   width: 100%;
   min-height: 100vh;
   background-color: var(--bg-container);
-  padding: clamp(1.5rem, 4vw, 2.5rem);
+  padding: clamp(1.5rem, 4vw, 2.5rem) clamp(0.75rem, 4vw, 2.5rem);
   transition: all 0.3s ease-in-out;
 }
 
@@ -56,13 +56,14 @@ body {
 }
 
 .app-header h1 {
-  font-size: 2.25rem;
+  font-size: clamp(1.2rem, 5vw, 2.25rem);
   font-weight: 700;
   color: var(--color-text);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
+  white-space: nowrap;
 }
 
 .header-logo {
@@ -73,9 +74,10 @@ body {
 }
 
 .app-header p {
-  font-size: 1rem;
+  font-size: clamp(0.75rem, 2.5vw, 1rem);
   color: var(--color-text-light);
   margin-top: 0.5rem;
+  white-space: nowrap;
 }
 
 /* Upload Zone - UPDATED STYLES */
@@ -835,190 +837,167 @@ document.addEventListener('DOMContentLoaded', () => {
             compressedFile: null,
             compressedUrl: null,
             status: 'compressing',
-            targetSize: 500, // Default target size
+            targetSize: 500,
             targetUnit: 'KB',
         }));
-        
+
         imageFilesState.push(...newFiles);
         render();
 
         newFiles.forEach(file => runCompressionForId(file.id));
     };
-    
+
     /**
-     * Compresses an image to a target file size in bytes.
-     * This function uses a two-step strategy to ensure the best possible result:
-     * 1. It first attempts a direct compression to the target size. This is fast and
-     *    effective for reachable targets.
-     * 2. If the result from step 1 is still larger than the target (i.e., the target
-     *    was unreachable), it performs a second, aggressive compression with very low
-     *    quality to get the absolute smallest file size possible as a fallback.
-     * @param {number} id - The ID of the file in the state.
-     * @param {number} targetBytes - The target size in bytes.
+     * The core image compression logic using the browser-image-compression library.
+     * @param {number} id - The ID of the file being compressed.
+     * @param {number} targetSizeBytes - The target file size in bytes.
      */
-    const compressToTargetSize = async (id, targetBytes) => {
+    async function compressToTargetSize(id, targetSizeBytes) {
         const fileState = imageFilesState.find(f => f.id === id);
         if (!fileState) return;
 
-        // Revoke any old object URLs to prevent memory leaks
-        if (fileState.compressedUrl) URL.revokeObjectURL(fileState.compressedUrl);
-
-        updateFileState(id, { status: 'compressing', compressedFile: null, compressedUrl: null });
+        updateFileState(id, { status: 'compressing' });
         render();
 
         try {
-            let resultBlob;
-            
-            // Step 1: Attempt to compress to the target size directly.
-            const directAttemptBlob = await imageCompression(fileState.originalFile, {
-                maxSizeMB: targetBytes / (1024 * 1024),
+            const options = {
+                maxSizeMB: targetSizeBytes / 1024 / 1024,
+                maxWidthOrHeight: 1920,
                 useWebWorker: true,
-            });
+                onProgress: (p) => {
+                    // We could add a progress bar here in the future
+                },
+            };
 
-            // Step 2: If the target was unreachable (result is > target), perform an
-            // aggressive compression to get the smallest possible file as a fallback.
-            if (directAttemptBlob.size > targetBytes) {
-                resultBlob = await imageCompression(fileState.originalFile, {
-                    initialQuality: 0.01, // Aggressive 99% quality reduction
-                    useWebWorker: true,
-                });
-            } else {
-                resultBlob = directAttemptBlob; // Target was reached.
-            }
+            const compressedFile = await imageCompression(fileState.originalFile, options);
 
             updateFileState(id, {
                 status: 'done',
-                compressedFile: resultBlob,
-                compressedUrl: URL.createObjectURL(resultBlob),
+                compressedFile: compressedFile,
+                compressedUrl: URL.createObjectURL(compressedFile),
             });
-        } catch (e) {
-            console.error("Compression failed for file ID " + id + ":", e);
+        } catch (error) {
+            console.error('Compression Error:', error);
             updateFileState(id, { status: 'error' });
-        } finally {
-            render();
+        }
+        render();
+    }
+
+    // --- Event Handlers ---
+    const handleAddFilesClick = () => fileInput.click();
+    const handleUploadZoneClick = (e) => {
+        if (e.target.id === 'upload-zone' || e.target.closest('#select-images-btn') || e.target.classList.contains('upload-hint')) {
+             fileInput.click();
         }
     };
-    
-    // --- Event Handlers ---
-    const handleFileChange = (event) => {
-        if (event.target.files.length > 0) {
-            processFiles(event.target.files);
-        }
-        event.target.value = ''; // Allow re-uploading the same file
+
+    const handleFileChange = (e) => processFiles(e.target.files);
+
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        uploadZone.classList.add('dragover');
+    };
+    const handleDragLeave = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        uploadZone.classList.remove('dragover');
+    };
+    const handleDrop = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        uploadZone.classList.remove('dragover');
+        processFiles(e.dataTransfer.files);
     };
 
     const handleRemoveImage = (id) => {
-        const fileToRemove = imageFilesState.find(f => f.id === id);
-        if (fileToRemove) {
-            if (fileToRemove.originalUrl) URL.revokeObjectURL(fileToRemove.originalUrl);
-            if (fileToRemove.compressedUrl) URL.revokeObjectURL(fileToRemove.compressedUrl);
+        const file = imageFilesState.find(f => f.id === id);
+        if (file) {
+            URL.revokeObjectURL(file.originalUrl);
+            if (file.compressedUrl) {
+                URL.revokeObjectURL(file.compressedUrl);
+            }
         }
         imageFilesState = imageFilesState.filter(f => f.id !== id);
         render();
     };
 
-    const handleTargetSizeApply = (id, targetSize, targetUnit) => {
-        if (isNaN(targetSize) || targetSize <= 0) {
-            alert("Please enter a valid, positive target size.");
-            return;
-        }
-        updateFileState(id, { targetSize, targetUnit });
+    const handleTargetSizeApply = (id, newSize, newUnit) => {
+        updateFileState(id, { targetSize: newSize, targetUnit: newUnit });
         runCompressionForId(id);
     };
 
     const handleReset = (id) => {
-        updateFileState(id, { 
-            targetSize: 500, // Default size
-            targetUnit: 'KB'  // Default unit
+        const fileState = imageFilesState.find(f => f.id === id);
+        if(!fileState) return;
+
+        updateFileState(id, {
+            compressedFile: null,
+            compressedUrl: null,
+            targetSize: 500, // Reset to default
+            targetUnit: 'KB'
         });
+
+        if (fileState.compressedUrl) {
+           URL.revokeObjectURL(fileState.compressedUrl);
+        }
+        
         runCompressionForId(id);
     };
 
     const handleApplyToAll = () => {
-        const targetSize = parseFloat(globalTargetSizeInput.value);
-        const targetUnit = globalTargetUnitSelect.value;
-        
-        if (isNaN(targetSize) || targetSize <= 0) {
-            alert("Please enter a valid, positive target size.");
-            return;
-        }
-        
+        const newSize = parseFloat(globalTargetSizeInput.value);
+        const newUnit = globalTargetUnitSelect.value;
         imageFilesState.forEach(file => {
-            // No need to re-run if settings are already the same
-            if (file.targetSize !== targetSize || file.targetUnit !== targetUnit) {
-                 updateFileState(file.id, { targetSize, targetUnit });
-                 runCompressionForId(file.id);
+            if (file.status !== 'error') {
+                 handleTargetSizeApply(file.id, newSize, newUnit);
             }
         });
     };
 
     const handleDownloadAll = async () => {
+        const zip = new JSZip();
         downloadAllDefault.style.display = 'none';
         downloadAllZipping.style.display = 'inline-flex';
         downloadAllBtn.disabled = true;
 
-        try {
-            const zip = new JSZip();
-            imageFilesState
-                .filter(file => file.status === 'done' && file.compressedFile)
-                .forEach(file => {
-                    zip.file(`compressed-${file.originalFile.name}`, file.compressedFile);
-                });
+        const filesToZip = imageFilesState.filter(f => f.status === 'done' && f.compressedFile);
 
-            const content = await zip.generateAsync({ type: 'blob' });
+        for (const file of filesToZip) {
+            zip.file(`compressed-${file.originalFile.name}`, file.compressedFile);
+        }
+        
+        try {
+            const content = await zip.generateAsync({ type: "blob" });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(content);
-            link.download = 'compressed-images.zip';
+            link.download = "compressed-images.zip";
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            URL.revokeObjectURL(link.href);
-        } catch(e) {
-            console.error("Failed to create zip file:", e);
-            alert("An error occurred while creating the zip file.");
+        } catch (error) {
+            console.error("Error zipping files:", error);
+            alert("There was an error creating the ZIP file.");
         } finally {
             downloadAllDefault.style.display = 'inline-flex';
             downloadAllZipping.style.display = 'none';
-            updateGlobalUI();
+            downloadAllBtn.disabled = false;
         }
     };
 
-    // --- Setup Event Listeners ---
-    const setupListeners = () => {
-        fileInput.addEventListener('change', handleFileChange);
-        addMoreBtn.addEventListener('click', () => fileInput.click());
-        downloadAllBtn.addEventListener('click', handleDownloadAll);
-        applyToAllBtn.addEventListener('click', handleApplyToAll);
-        
-        // Click and Drag-and-Drop for the upload zone
-        uploadZone.addEventListener('click', () => fileInput.click());
-        uploadZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadZone.classList.add('dragover');
-        });
-        uploadZone.addEventListener('dragleave', () => {
-            uploadZone.classList.remove('dragover');
-        });
-        uploadZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadZone.classList.remove('dragover');
-            if (e.dataTransfer.files.length > 0) {
-                processFiles(e.dataTransfer.files);
-            }
-        });
+    // --- Initial Setup ---
+    uploadZone.addEventListener('click', handleUploadZoneClick);
+    fileInput.addEventListener('change', handleFileChange);
+    uploadZone.addEventListener('dragover', handleDragOver);
+    uploadZone.addEventListener('dragleave', handleDragLeave);
+    uploadZone.addEventListener('drop', handleDrop);
+    addMoreBtn.addEventListener('click', handleAddFilesClick);
+    applyToAllBtn.addEventListener('click', handleApplyToAll);
+    downloadAllBtn.addEventListener('click', handleDownloadAll);
 
-        // Cleanup object URLs on page leave to prevent memory leaks
-        window.addEventListener('beforeunload', () => {
-            imageFilesState.forEach(file => {
-                if (file.originalUrl) URL.revokeObjectURL(file.originalUrl);
-                if (file.compressedUrl) URL.revokeObjectURL(file.compressedUrl);
-            });
-        });
-    };
-    
-    // --- App Initialization ---
-    setupListeners();
+    render(); // Initial render for the upload view
 });
+
 </script>
 </body>
 </html>
