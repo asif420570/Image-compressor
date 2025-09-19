@@ -115,26 +115,23 @@ body {
 .global-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 1rem 1.5rem;
   justify-content: center;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 2rem;
   padding: 1.5rem;
   background-color: #f8f9fa;
   border-radius: 12px;
 }
 
-.global-target-controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 2rem;
-  padding: 1rem 1.5rem;
-  background-color: #f8f9fa;
-  border-radius: 12px;
+.global-actions-buttons, .global-actions-apply {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
 }
+
 
 /* Results List */
 .results-list {
@@ -255,9 +252,6 @@ body {
   gap: 0.5rem;
 }
 
-.target-size-label {
-    display: none;
-}
 .target-size-input {
     width: 70px;
     padding: 0.4rem 0.6rem;
@@ -317,6 +311,21 @@ body {
   background-color: #a0c7ff;
   cursor: not-allowed;
 }
+
+.btn-secondary {
+  background-color: #e9ecef;
+  color: var(--color-text);
+  border: 1px solid var(--border-color);
+}
+.btn-secondary:hover:not(:disabled) {
+  background-color: #dee2e6;
+}
+.btn-secondary:disabled {
+  background-color: #f8f9fa;
+  color: #adb5bd;
+  cursor: not-allowed;
+}
+
 
 /* Prominent Upload Button Style */
 #select-images-btn {
@@ -428,15 +437,30 @@ body {
 }
 
 /* Responsive Design */
+@media (min-width: 768px) {
+    .global-actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+
+    .global-actions-buttons {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+    }
+
+    .global-actions-apply {
+        justify-content: center;
+    }
+}
+
+
 @media (max-width: 767px) {
   .upload-zone {
       padding: 1.5rem;
   }
-  .global-actions, .global-target-controls {
-      flex-direction: column;
-      align-items: stretch;
-  }
-  
+
   .result-card {
     flex-direction: column;
     align-items: stretch;
@@ -554,29 +578,34 @@ body {
 
                 <div id="results-container" style="display: none;">
                     <section class="global-actions">
-                        <button id="add-more-btn" class="btn btn-primary">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                             Add More Images
-                        </button>
-                        <button id="download-all-btn" class="btn btn-primary">
-                            <span id="download-all-default">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" x2="12" y1="15" y2="3" /></svg>
-                                Download All as ZIP
-                                <span id="download-count-badge" class="badge"></span>
-                            </span>
-                             <span id="download-all-zipping" style="display: none;">
-                                <div class="spinner"></div> Zipping...
-                            </span>
-                        </button>
-                    </section>
-                    <section class="global-target-controls">
-                        <label for="global-target-size-input" class="target-size-label">Global Target Size:</label>
-                        <input type="number" id="global-target-size-input" class="target-size-input" value="500">
-                        <select id="global-target-unit-select" class="target-unit-select">
-                            <option value="KB" selected>KB</option>
-                            <option value="MB">MB</option>
-                        </select>
-                        <button id="apply-to-all-btn" class="btn btn-primary btn-small">Apply to All</button>
+                        <div class="global-actions-buttons">
+                            <button id="add-more-btn" class="btn btn-primary">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                 Add More Images
+                            </button>
+                             <button id="download-all-btn" class="btn btn-primary">
+                                <span id="download-all-default">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" x2="12" y1="15" y2="3" /></svg>
+                                    Download All
+                                    <span id="download-count-badge" class="badge"></span>
+                                </span>
+                                 <span id="download-all-zipping" style="display: none;">
+                                    <div class="spinner"></div> Zipping...
+                                </span>
+                            </button>
+                            <button id="clear-all-btn" class="btn btn-secondary">
+                               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                Clear All
+                            </button>
+                        </div>
+                        <div class="global-actions-apply">
+                            <input type="number" id="global-target-size-input" class="target-size-input" value="500" aria-label="Global target size">
+                            <select id="global-target-unit-select" class="target-unit-select" aria-label="Global target unit">
+                                <option value="KB" selected>KB</option>
+                                <option value="MB">MB</option>
+                            </select>
+                            <button id="apply-to-all-btn" class="btn btn-primary btn-small">Apply to All</button>
+                        </div>
                     </section>
                     <section class="results-list" id="results-list"></section>
                 </div>
@@ -648,6 +677,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultsList = document.getElementById('results-list');
     const addMoreBtn = document.getElementById('add-more-btn');
     const downloadAllBtn = document.getElementById('download-all-btn');
+    const clearAllBtn = document.getElementById('clear-all-btn');
     const downloadCountBadge = document.getElementById('download-count-badge');
     const globalTargetSizeInput = document.getElementById('global-target-size-input');
     const globalTargetUnitSelect = document.getElementById('global-target-unit-select');
@@ -801,6 +831,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const anyDone = imageFilesState.some(f => f.status === 'done');
         downloadAllBtn.disabled = anyCompressing || !anyDone;
         applyToAllBtn.disabled = anyCompressing;
+        clearAllBtn.disabled = anyCompressing;
         
         // Update download badge
         const readyToDownloadCount = imageFilesState.filter(f => f.status === 'done' && f.compressedFile).length;
@@ -954,6 +985,21 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     };
+    
+    const handleClearAll = () => {
+        // Revoke URLs to prevent memory leaks
+        imageFilesState.forEach(file => {
+            URL.revokeObjectURL(file.originalUrl);
+            if (file.compressedUrl) {
+                URL.revokeObjectURL(file.compressedUrl);
+            }
+        });
+        // Clear state
+        imageFilesState = [];
+        nextId = 0;
+        // Re-render to show the upload view
+        render();
+    };
 
     const handleDownloadAll = async () => {
         const zip = new JSZip();
@@ -994,6 +1040,7 @@ document.addEventListener('DOMContentLoaded', () => {
     addMoreBtn.addEventListener('click', handleAddFilesClick);
     applyToAllBtn.addEventListener('click', handleApplyToAll);
     downloadAllBtn.addEventListener('click', handleDownloadAll);
+    clearAllBtn.addEventListener('click', handleClearAll);
 
     render(); // Initial render for the upload view
 });
