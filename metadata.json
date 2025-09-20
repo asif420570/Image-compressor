@@ -1,5 +1,5 @@
 {
-  "name": "Simple Image Compressor",
-  "description": "A client-side image compressor that allows users to compress images to a target file size. Users can upload multiple images, which are compressed in the browser, and download them individually or as a single zip file.",
+  "name": "SimpleCompressGo",
+  "description": "Reduce image file size with SimpleCompressGo, our free online optimizer. Compress JPG, PNG, & WEBP images quickly and privately in your browser—no uploads required!",
   "requestFramePermissions": []
 }
