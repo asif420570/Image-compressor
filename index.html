@@ -3,21 +3,21 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Free Image Compressor: Optimize & Reduce Image Size Online</title>
+    <title>Simple Compress GO: Optimize & Reduce Image Size Online</title>
     <meta name="description" content="Compress JPG, PNG, & WEBP images to reduce file size with our free online optimizer. Fast, private, and easy to use—your images are processed in your browser, no uploads required!">
     <meta name="keywords" content="image compressor, image optimizer, reduce image size, photo compressor, compress jpg, compress png, image resizer, online image compressor, free image compressor">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23007BFF'/%3E%3Cpath fill='white' d='M4 12L12 4H8L4 8zM28 12L20 4h4l4 4zM28 20L20 28h4l4-4zM4 20l8 8H8l-4-4z'/%3E%3C/svg%3E">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%232563EB'/%3E%3Cpath fill='white' d='M4 12L12 4H8L4 8zM28 12L20 4h4l4 4zM28 20L20 28h4l4-4zM4 20l8 8H8l-4-4z'/%3E%3C/svg%3E">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <style>
 :root {
   --bg-main: #f4f6f8;
   --bg-container: #ffffff;
-  --color-primary: #007BFF;
-  --color-primary-hover: #0056b3;
+  --color-primary: #2563EB;
+  --color-primary-hover: #1D4ED8;
   --color-success: #28a745;
   --color-text: #343a40;
   --color-text-light: #6c757d;
@@ -66,6 +66,12 @@ body {
   justify-content: center;
   gap: 0.75rem;
   white-space: nowrap;
+}
+
+.app-header h1 span {
+  font-weight: 800;
+  font-style: italic;
+  color: var(--color-text);
 }
 
 .header-logo {
@@ -306,7 +312,7 @@ body {
 
 .btn-primary:hover:not(:disabled) {
   background-color: var(--color-primary-hover);
-  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.25);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
 }
 
 .btn-primary:disabled {
@@ -562,9 +568,9 @@ body {
                         <rect width="32" height="32" rx="6" fill="currentColor"/>
                         <path fill="white" d="M5 12L12 5h-4l-3 3z M20 5l7 7h-4l-3-4z M27 20l-7 7v-4l4-3z M12 27l-7-7h4l3 4z"/>
                     </svg>
-                    <span>Simple Image Compressor</span>
+                    <span>Simple Compress GO</span>
                 </h1>
-                <p>Compress images to a target file size. Fast, private, and free.</p>
+                <p>Your go-to tool for fast, private, and free image compression.</p>
             </header>
 
             <main>
@@ -614,7 +620,7 @@ body {
             </main>
 
             <footer class="app-footer">
-                <h1><strong>Simple Image Compressor: Instantly Reduce Image Size</strong></h1>
+                <h1><strong>Simple Compress GO: Instantly Reduce Image Size</strong></h1>
                 <h2>Optimize your JPG, PNG, and WEBP images for the web. Our free photo compressor makes your website faster without sacrificing quality.</h2>
 
                 <hr>
@@ -811,8 +817,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const applyBtn = card.querySelector('.btn-apply');
             if (applyBtn) {
                 applyBtn.addEventListener('click', () => {
-                    const sizeInput = card.querySelector(`#target-size-${file.id}`);
-                    const unitSelect = card.querySelector(`#target-unit-${file.id}`);
+                    const sizeInput = card.querySelector(`#target-size-${id}`);
+                    const unitSelect = card.querySelector(`#target-unit-${id}`);
                     handleTargetSizeApply(id, parseFloat(sizeInput.value), unitSelect.value);
                 });
             }
