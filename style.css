@@ -45,7 +45,7 @@ body {
 .app-header h1 {
   font-size: clamp(1.2rem, 5vw, 2.25rem);
   font-weight: 700;
-  color: var(--color-text);
+  color: var(--color-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -56,7 +56,6 @@ body {
 .app-header h1 span {
   font-weight: 800;
   font-style: italic;
-  color: var(--color-text);
 }
 
 .header-logo {
