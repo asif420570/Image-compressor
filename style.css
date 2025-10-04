@@ -277,7 +277,7 @@ body {
 /* Responsive */
 @media (min-width: 640px) {
   .result-card { flex-direction: row; align-items: center; justify-content: space-between; }
-  .card-controls { flex-direction: row; align-items: center; justify-content: space-between; flex-grow: 1; padding: 0; background: none; }
+  .card-controls { flex-direction: row; align-items: center; justify-content: space-between; flex-shrink: 0; width: 420px; padding: 0; background: none; }
   .card-target-controls { padding: 0; background: none; }
   .platform-grid { grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
 }
