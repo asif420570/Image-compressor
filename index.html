@@ -6,6 +6,19 @@
     <title>Online Image Compressor | Simple Compress Go</title>
     <meta name="description" content="Reduce image file size with Simple Compress Go, our free online optimizer. Compress JPG, PNG, & WEBP images quickly and privately in your browser—no uploads required!">
     <meta name="keywords" content="image compressor, image optimizer, reduce image size, photo compressor, compress jpg, compress png, image resizer, online image compressor, free image compressor,Simple compress go">
+    
+    <!-- Social Media Meta Tags -->
+    <meta property="og:title" content="Online Image Compressor | Simple Compress Go">
+    <meta property="og:description" content="Reduce image file size with Simple Compress Go, our free online optimizer. Compress JPG, PNG, & WEBP images quickly and privately in your browser—no uploads required!">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://simplecompress.com/">
+    <meta property="og:image" content="https://simplecompress.com/apple-touch-icon.png">
+    <meta property="og:site_name" content="Simple Compress Go">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Online Image Compressor | Simple Compress Go">
+    <meta name="twitter:description" content="Reduce image file size with Simple Compress Go, our free online optimizer. Compress JPG, PNG, & WEBP images quickly and privately in your browser—no uploads required!">
+    <meta name="twitter:image" content="https://simplecompress.com/apple-touch-icon.png">
+
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -70,8 +83,9 @@
                     </div>
                 </div>
 
-                <div id="results-container" style="display: none;">
-                    <section class="global-actions">
+                <section id="results-container" style="display: none;" role="region" aria-labelledby="results-heading">
+                    <h2 id="results-heading" class="visually-hidden">Compressed Images</h2>
+                    <div class="global-actions">
                         <div class="global-actions-buttons">
                             <button id="add-more-btn" class="btn btn-primary">
                                 <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
@@ -100,9 +114,9 @@
                             </select>
                             <button id="apply-to-all-btn" class="btn btn-primary btn-small">Apply to All</button>
                         </div>
-                    </section>
-                    <section class="results-list" id="results-list"></section>
-                </div>
+                    </div>
+                    <div class="results-list" id="results-list"></div>
+                </section>
             </main>
 
             <footer class="app-footer">
@@ -110,10 +124,10 @@
                 <p class="footer-subtitle">Instantly reduce image size for a faster website, better SEO, and a superior user experience. Simple Compress Go is your free, private, and powerful online optimizer.</p>
                 <hr>
 
-                <h4 class="footer-section-title">
+                <h3 class="footer-section-title">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L9 9l-7 3 7 3 2 7 2-7 7-3-7-3-3-7z"/></svg>
                     Core Features Designed for Performance
-                </h4>
+                </h3>
                 <ul class="features-list">
                     <li>
                         <strong>
@@ -140,10 +154,10 @@
 
                 <hr>
 
-                <h4 class="footer-section-title">
+                <h3 class="footer-section-title">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l7 4-7 4Z"/><path d="M12 18v-2m-4 4v-2m-4 4v-2"/></svg>
                     How to Compress Your Image in 3 Simple Steps
-                </h4>
+                </h3>
                 <ol class="steps-list">
                     <li><strong>Select Your Image:</strong> Simply drag and drop your image file onto the upload area, or click the button to browse and select your picture.</li>
                     <li><strong>Compress Instantly:</strong> Your image is automatically optimized. For more control, use our advanced settings to achieve the exact file size you need.</li>
@@ -152,10 +166,10 @@
 
                 <hr>
 
-                <h4 class="footer-section-title">
+                <h3 class="footer-section-title">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h7v7H3z"/><path d="M14 3h7v7h-7z"/><path d="M14 14h7v7h-7z"/><path d="M3 14h7v7H3z"/></svg>
                     Optimize Images for Every Platform
-                </h4>
+                </h3>
                 <div class="platform-grid">
                     <div class="platform-item">
                         <h5>For Your Website (WordPress, Shopify, etc.)</h5>

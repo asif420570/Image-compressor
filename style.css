@@ -261,6 +261,19 @@ body {
 .faq-list dt { font-weight: 600; color: var(--color-text-header); margin-top: 1.5rem; }
 .faq-list dd { margin-top: 0.5rem; margin-left: 0; padding-left: 1.25rem; border-left: 3px solid var(--color-primary); color: var(--color-text-muted); }
 
+/* Accessibility */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
 /* Responsive */
 @media (min-width: 640px) {
   .result-card { flex-direction: row; align-items: center; justify-content: space-between; }

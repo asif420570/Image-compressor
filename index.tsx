@@ -176,21 +176,23 @@ document.addEventListener('DOMContentLoaded', () => {
         newFiles.forEach(file => runCompressionForId(file.id));
     };
 
-    async function compressToTargetSize(id: number, targetSizeBytes: number) {
+    async function compressToTargetSize(id: number, targetSizeBytes: number, options: { suppressInitialRender?: boolean } = {}) {
         const fileState = imageFilesState.find(f => f.id === id);
         if (!fileState) return;
-
-        updateFileState(id, { status: 'compressing' });
-        render();
+        
+        if (!options.suppressInitialRender) {
+            updateFileState(id, { status: 'compressing' });
+            render();
+        }
 
         try {
-            const options = {
+            const compressionOptions = {
                 maxSizeMB: targetSizeBytes / 1024 / 1024,
                 maxWidthOrHeight: 1920,
                 useWebWorker: true,
             };
 
-            const compressedFile = await imageCompression(fileState.originalFile, options);
+            const compressedFile = await imageCompression(fileState.originalFile, compressionOptions);
 
             updateFileState(id, {
                 status: 'done',
@@ -270,10 +272,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const handleApplyToAll = () => {
         const newSize = parseFloat(globalTargetSizeInput.value);
         const newUnit = globalTargetUnitSelect.value as SizeUnit;
-        imageFilesState.forEach(file => {
-            if (file.status !== 'error') {
-                 handleTargetSizeApply(file.id, newSize, newUnit);
-            }
+        if (isNaN(newSize) || newSize <= 0) {
+            globalTargetSizeInput.focus();
+            return;
+        }
+
+        const filesToUpdate = imageFilesState.filter(f => f.status !== 'error');
+        if (filesToUpdate.length === 0) return;
+
+        // Batch update state for a single render
+        filesToUpdate.forEach(file => {
+            updateFileState(file.id, {
+                targetSize: newSize,
+                targetUnit: newUnit,
+                status: 'compressing'
+            });
+        });
+        render(); // Render all cards with spinners at once
+
+        // Start compression jobs without causing more renders initially
+        filesToUpdate.forEach(file => {
+            const multiplier = newUnit === 'MB' ? 1024 * 1024 : 1024;
+            const targetBytes = newSize * multiplier;
+            compressToTargetSize(file.id, targetBytes, { suppressInitialRender: true });
         });
     };
     
